@@ -38,51 +38,10 @@ FRmodel = faceRecoModel(input_shape=(3, 96, 96))
 
 print("Total Params:", FRmodel.count_params())
 
-
-# ** Expected Output **
-# <table>
-# <center>
-# Total Params: 3743280
-# </center>
-# </table>
-# 
-
-# By using a 128-neuron fully connected layer as its last layer, the model ensures that the output is an encoding vector of size 128. You then use the encodings the compare two face images as follows:
-# 
-# <img src="images/distance_kiank.png" style="width:680px;height:250px;">
-# <caption><center> <u> <font color='purple'> **Figure 2**: <br> </u> <font color='purple'> By computing a distance between two encodings and thresholding, you can determine if the two pictures represent the same person</center></caption>
-# 
-# So, an encoding is a good one if: 
-# - The encodings of two images of the same person are quite similar to each other 
-# - The encodings of two images of different persons are very different
-# 
-# The triplet loss function formalizes this, and tries to "push" the encodings of two images of the same person (Anchor and Positive) closer together, while "pulling" the encodings of two images of different persons (Anchor, Negative) further apart. 
-# 
-# <img src="images/triplet_comparison.png" style="width:280px;height:150px;">
-# <br>
-# <caption><center> <u> <font color='purple'> **Figure 3**: <br> </u> <font color='purple'> In the next part, we will call the pictures from left to right: Anchor (A), Positive (P), Negative (N)  </center></caption>
-
-# 
-# 
-# ### 1.2 - The Triplet Loss
-
 # In[4]:
 
 def triplet_loss(y_true, y_pred, alpha = 0.2):
-    """
-    Implementation of the triplet loss as defined by formula (3)
-
-    Arguments:
-    y_true -- true labels, required when you define a loss in Keras, you don't need it in this function.
-    y_pred -- python list containing three objects:
-            anchor -- the encodings for the anchor images, of shape (None, 128)
-            positive -- the encodings for the positive images, of shape (None, 128)
-            negative -- the encodings for the negative images, of shape (None, 128)
-
-    Returns:
-    loss -- real number, value of the loss
-    """
-
+    
     anchor, positive, negative = y_pred[0], y_pred[1], y_pred[2]
 
     # Step 1: Compute the (encoding) distance between the anchor and the positive, you will need to sum over axis=-1
@@ -141,20 +100,6 @@ database["arnaud"] = img_to_encoding("images/arnaud.jpg", FRmodel)
 # In[9]:
 
 def verify(image_path, identity, database, model):
-    """
-    Function that verifies if the person on the "image_path" image is "identity".
-
-    Arguments:
-    image_path -- path to an image
-    identity -- string, name of the person you'd like to verify the identity. Has to be a resident of the Happy house.
-    database -- python dictionary mapping names of allowed people's names (strings) to their encodings (vectors).
-    model -- your Inception model instance in Keras
-
-    Returns:
-    dist -- distance between the image_path and the image of "identity" in the database.
-    door_open -- True, if the door should open. False otherwise.
-    """
-
 
     # Step 1: Compute the encoding for the image. Use img_to_encoding() see example above. (≈ 1 line)
     encoding = img_to_encoding(image_path, model)
@@ -187,18 +132,6 @@ verify("images/camera_2.jpg", "kian", database, FRmodel)
 # In[12]:
 
 def who_is_it(image_path, database, model):
-    """
-    Implements face recognition for the happy house by finding who is the person on the image_path image.
-
-    Arguments:
-    image_path -- path to an image
-    database -- database containing image encodings along with the name of the person on the image
-    model -- your Inception model instance in Keras
-
-    Returns:
-    min_dist -- the minimum distance between image_path encoding and the encodings from the database
-    identity -- string, the name prediction for the person on image_path
-    """
 
     ## Step 1: Compute the target "encoding" for the image. Use img_to_encoding() see example above. ## (≈ 1 line)
     encoding = img_to_encoding(image_path, model)
